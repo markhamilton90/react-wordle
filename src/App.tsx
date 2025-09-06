@@ -39,27 +39,53 @@ function App() {
 
   useEffect(() => {
     function handleKeyUp(event: KeyboardEvent) {
-      console.log(currentRow);
       // Find the next tile that is empty (null)
-      const currentTile = letters[currentRow].findIndex((item) => item == null);
+      const row = letters[currentRow];
+      const currentTile = row.includes(null)
+        ? row.findIndex((item) => item == null)
+        : row.length;
 
-      // Validate that the key is a proper letter
-      if (/^[a-zA-Z]$/.test(event.key) == false) {
+      if (currentTile < 0) {
         return;
       }
 
-      const updatedLetters = [...letters];
-      updatedLetters[currentRow][currentTile] = event.key;
-      setLetters([...updatedLetters]);
-
-      // If no empty tiles remain, advance to the next row
-      if (letters[currentRow].includes(null) == false) {
-        console.log("is doing it???");
-        setCurrentRow((currentRow) => currentRow + 1);
+      switch (event.key) {
+        case "Backspace":
+          handleDelete(currentTile - 1);
+          break;
+        case "Enter":
+          handleEnter();
+          break;
+        default:
+          handleOtherKeys(event.key, currentTile);
       }
     }
 
-    window.addEventListener("keyup", handleKeyUp);
+    function handleDelete(tile: number) {
+      const updatedLetters = [...letters];
+      updatedLetters[currentRow][tile] = null;
+      setLetters([...updatedLetters]);
+    }
+
+    function handleEnter() {
+      if (letters[currentRow].includes(null)) {
+        return;
+      }
+      setCurrentRow((currentRow) => currentRow + 1);
+    }
+
+    function handleOtherKeys(key: string, tile: number) {
+      if (/^[a-zA-Z]$/.test(key) == false) {
+        return;
+      }
+      const updatedLetters = [...letters];
+      updatedLetters[currentRow][tile] = key;
+      setLetters([...updatedLetters]);
+    }
+
+    if (currentRow < letters.length) {
+      window.addEventListener("keyup", handleKeyUp);
+    }
 
     return () => {
       window.removeEventListener("keyup", handleKeyUp);
