@@ -22,3 +22,13 @@
   justify-content: center;
   align-items: center;
 }
+
+.match {
+  background: rgb(103, 253, 103);
+}
+.out-of-place {
+  background: gray;
+}
+.none {
+  background: rgb(253, 45, 45);
+}

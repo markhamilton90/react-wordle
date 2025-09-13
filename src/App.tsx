@@ -1,22 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Row from "./Row";
+import { makeGrid } from "./helpers";
 
 function App() {
-  const tileCount = 5;
-  const lettersArray = [
-    Array(5).fill(null),
-    Array(5).fill(null),
-    Array(5).fill(null),
-    Array(5).fill(null),
-    Array(5).fill(null),
-    Array(5).fill(null),
-  ];
+  const ROWS = 6;
+  const TILES = 5;
+  const gridArray = makeGrid(ROWS, TILES);
 
-  // const lettersArr = Array(5).fill(Array(5).fill(null));
-  const [letters, setLetters] = useState(lettersArray);
-  const [currentRow, setCurrentRow] = useState(0);
-  const [word, setWord] = useState([]);
+  const [grid, setGrid] = useState(gridArray);
+  const [counter, setCounter] = useState(0);
+  const [word, setWord] = useState("trees");
+
+  const counterRef = useRef(counter);
 
   useEffect(() => {
     async function getRandomWord() {
@@ -38,68 +34,82 @@ function App() {
   }, []);
 
   useEffect(() => {
+    counterRef.current = counter;
+  }, [counter]);
+
+  useEffect(() => {
     function handleKeyUp(event: KeyboardEvent) {
+      // if counter has exceeded the number of rows, we are done with the game
+      if (counterRef.current >= grid.length) {
+        return;
+      }
       // Find the next tile that is empty (null)
-      const row = letters[currentRow];
-      const currentTile = row.includes(null)
+      const row = grid[counterRef.current];
+      const currentTile = grid[counterRef.current].includes(null)
         ? row.findIndex((item) => item == null)
         : row.length;
 
-      if (currentTile < 0) {
-        return;
-      }
-
       switch (event.key) {
         case "Backspace":
-          handleDelete(currentTile - 1);
+          handleDelete(counterRef.current, currentTile - 1);
           break;
         case "Enter":
-          handleEnter();
+          handleEnter(counterRef.current);
           break;
         default:
-          handleOtherKeys(event.key, currentTile);
+          handleOtherKeys(event.key, counterRef.current, currentTile);
       }
     }
 
-    function handleDelete(tile: number) {
-      const updatedLetters = [...letters];
-      updatedLetters[currentRow][tile] = null;
-      setLetters([...updatedLetters]);
-    }
-
-    function handleEnter() {
-      if (letters[currentRow].includes(null)) {
-        return;
-      }
-      setCurrentRow((currentRow) => currentRow + 1);
-    }
-
-    function handleOtherKeys(key: string, tile: number) {
-      if (/^[a-zA-Z]$/.test(key) == false) {
-        return;
-      }
-      const updatedLetters = [...letters];
-      updatedLetters[currentRow][tile] = key;
-      setLetters([...updatedLetters]);
-    }
-
-    if (currentRow < letters.length) {
-      window.addEventListener("keyup", handleKeyUp);
-    }
+    window.addEventListener("keyup", handleKeyUp);
 
     return () => {
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [currentRow]);
+  }, [word]);
+
+  function handleDelete(row: number, tile: number) {
+    const updatedGrid = [...grid];
+    updatedGrid[row][tile] = null;
+    setGrid([...updatedGrid]);
+  }
+
+  function handleEnter(row: number) {
+    if (grid[row].includes(null)) {
+      return;
+    }
+    setCounter((prev) => prev + 1);
+  }
+
+  function handleOtherKeys(key: string, row: number, tile: number) {
+    if (tile === grid[row].length) {
+      return;
+    }
+
+    key = key.toLowerCase();
+
+    if (/^[a-z]$/.test(key) == false) {
+      return;
+    }
+
+    const updatedGrid = [...grid];
+    updatedGrid[row][tile] = key;
+    setGrid([...updatedGrid]);
+  }
 
   return (
-    <div className="board">
-      <Row letters={letters[0]} length={tileCount} />
-      <Row letters={letters[1]} length={tileCount} />
-      <Row letters={letters[2]} length={tileCount} />
-      <Row letters={letters[3]} length={tileCount} />
-      <Row letters={letters[4]} length={tileCount} />
-      <Row letters={letters[5]} length={tileCount} />
+    <div className="grid">
+      {grid.map((arr, index) => {
+        return (
+          <Row
+            key={index}
+            letters={arr}
+            word={word}
+            counter={counter}
+            rowNumber={index}
+          />
+        );
+      })}
     </div>
   );
 }
