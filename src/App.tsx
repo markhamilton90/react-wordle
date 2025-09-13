@@ -8,17 +8,17 @@ function App() {
   const TILES = 5;
   const gridArray = makeGrid(ROWS, TILES);
 
-  const [grid, setGrid] = useState(gridArray);
-  const [counter, setCounter] = useState(0);
-  const [word, setWord] = useState("trees");
+  const [grid, setGrid] = useState<(string | null)[][]>(gridArray);
+  const [counter, setCounter] = useState<number>(0);
+  const [word, setWord] = useState<string>("trees");
 
-  const counterRef = useRef(counter);
+  const counterRef = useRef<number>(counter);
 
   useEffect(() => {
     async function getRandomWord() {
       try {
         const response = await fetch(
-          "https://random-word-api.herokuapp.com/word?length=5"
+          "https://random-word-api.vercel.app/api?words=1&length=5"
         );
         if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);
@@ -45,7 +45,7 @@ function App() {
       }
       // Find the next tile that is empty (null)
       const row = grid[counterRef.current];
-      const currentTile = grid[counterRef.current].includes(null)
+      const currentTile = row.includes(null)
         ? row.findIndex((item) => item == null)
         : row.length;
 
