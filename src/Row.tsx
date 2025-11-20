@@ -1,19 +1,20 @@
 import Tile from "./Tile";
 
-type RowProps = {
-  letters: any[];
+interface RowProps {
+  letters: (string | null)[];
   word: string;
   counter: number;
+  currentTile: number;
   rowNumber: number;
-};
+}
 
-function Row({ letters, word, counter, rowNumber }: RowProps) {
-  const tileCount = 5;
-  console.log(letters);
+function Row({ letters, word, counter, currentTile, rowNumber }: RowProps) {
+  const currentRow = counter == rowNumber;
 
   return (
     <div className="tile-row">
-      {[...Array(tileCount)].map((_, index) => {
+      {[...Array(letters.length)].map((_, index) => {
+        const shouldAnimate = currentRow && index == currentTile - 1;
         return (
           <Tile
             letter={letters[index] || ""}
@@ -22,6 +23,7 @@ function Row({ letters, word, counter, rowNumber }: RowProps) {
             word={word}
             counter={counter}
             rowNumber={rowNumber}
+            shouldAnimate={shouldAnimate}
           />
         );
       })}

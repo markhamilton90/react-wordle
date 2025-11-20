@@ -10,9 +10,20 @@ function App() {
 
   const [grid, setGrid] = useState<(string | null)[][]>(gridArray);
   const [counter, setCounter] = useState<number>(0);
+  const [currentTile, setCurrentTile] = useState<number>(0);
   const [word, setWord] = useState<string>("trees");
+  const [win, setWin] = useState<boolean | null>(null);
 
   const counterRef = useRef<number>(counter);
+  const tileRef = useRef<number>(currentTile);
+
+  useEffect(() => {
+    counterRef.current = counter;
+  }, [counter]);
+
+  useEffect(() => {
+    tileRef.current = currentTile;
+  }, [currentTile]);
 
   useEffect(() => {
     async function getRandomWord() {
@@ -34,30 +45,21 @@ function App() {
   }, []);
 
   useEffect(() => {
-    counterRef.current = counter;
-  }, [counter]);
-
-  useEffect(() => {
     function handleKeyUp(event: KeyboardEvent) {
-      // if counter has exceeded the number of rows, we are done with the game
+      // If counter has exceeded the number of rows, we are done with the game
       if (counterRef.current >= grid.length) {
         return;
       }
-      // Find the next tile that is empty (null)
-      const row = grid[counterRef.current];
-      const currentTile = row.includes(null)
-        ? row.findIndex((item) => item == null)
-        : row.length;
 
       switch (event.key) {
         case "Backspace":
-          handleDelete(counterRef.current, currentTile - 1);
+          handleDelete(counterRef.current, tileRef.current - 1);
           break;
         case "Enter":
           handleEnter(counterRef.current);
           break;
         default:
-          handleOtherKeys(event.key, counterRef.current, currentTile);
+          handleOtherKeys(event.key, counterRef.current, tileRef.current);
       }
     }
 
@@ -72,13 +74,24 @@ function App() {
     const updatedGrid = [...grid];
     updatedGrid[row][tile] = null;
     setGrid([...updatedGrid]);
+    setCurrentTile((prev) => (prev > 0 ? prev - 1 : 0));
   }
 
   function handleEnter(row: number) {
     if (grid[row].includes(null)) {
       return;
     }
+
+    if (grid[row].join("") === word) {
+      setWin(true);
+    }
+
     setCounter((prev) => prev + 1);
+    setCurrentTile(0);
+
+    if (counterRef.current >= grid.length) {
+      setWin(false);
+    }
   }
 
   function handleOtherKeys(key: string, row: number, tile: number) {
@@ -95,22 +108,27 @@ function App() {
     const updatedGrid = [...grid];
     updatedGrid[row][tile] = key;
     setGrid([...updatedGrid]);
+    setCurrentTile((prev) => prev + 1);
   }
 
   return (
-    <div className="grid">
-      {grid.map((arr, index) => {
-        return (
-          <Row
-            key={index}
-            letters={arr}
-            word={word}
-            counter={counter}
-            rowNumber={index}
-          />
-        );
-      })}
-    </div>
+    <>
+      {win && <h1>You win!</h1>}
+      <div className="grid">
+        {grid.map((arr, index) => {
+          return (
+            <Row
+              key={index}
+              letters={arr}
+              word={word}
+              counter={counter}
+              currentTile={currentTile}
+              rowNumber={index}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 }
 
