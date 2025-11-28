@@ -6,15 +6,20 @@ interface RowProps {
   counter: number;
   currentTile: number;
   rowNumber: number;
+  animate: boolean;
 }
 
-function Row({ letters, word, counter, currentTile, rowNumber }: RowProps) {
-  const currentRow = counter == rowNumber;
-
+function Row({
+  letters,
+  word,
+  counter,
+  currentTile,
+  rowNumber,
+  animate,
+}: RowProps) {
   return (
     <div className="tile-row">
       {[...Array(letters.length)].map((_, index) => {
-        const shouldAnimate = currentRow && index == currentTile - 1;
         return (
           <Tile
             letter={letters[index] || ""}
@@ -23,7 +28,8 @@ function Row({ letters, word, counter, currentTile, rowNumber }: RowProps) {
             word={word}
             counter={counter}
             rowNumber={rowNumber}
-            shouldAnimate={shouldAnimate}
+            currentTile={currentTile}
+            animate={animate}
           />
         );
       })}

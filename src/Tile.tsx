@@ -4,11 +4,8 @@ interface TileProps {
   word: string;
   counter: number;
   rowNumber: number;
-  shouldAnimate: boolean;
-}
-
-function handleAnimationEnd(event: React.AnimationEvent<HTMLDivElement>) {
-  console.log("animation has ended");
+  currentTile: number;
+  animate: boolean;
 }
 
 function Tile({
@@ -17,17 +14,21 @@ function Tile({
   word,
   counter,
   rowNumber,
-  shouldAnimate,
+  currentTile,
+  animate,
 }: TileProps) {
   const exactMatch = word[index] === letter;
-  const hasLetter = word.includes(letter);
+  const outOfPlace = word.includes(letter);
 
-  let status = exactMatch ? "match" : hasLetter ? "out-of-place" : "none";
+  let status = exactMatch ? " match" : outOfPlace ? " out-of-place" : " none";
   status = counter > rowNumber ? status : "";
 
-  const currentClass = shouldAnimate ? "pulse" : "";
+  const animation =
+    counter == rowNumber && index == currentTile - 1 && animate ? " pulse" : "";
 
-  return <div className={`tile ${status} ${currentClass}`}>{letter}</div>;
+  const classList = status + animation;
+
+  return <div className={`tile ${classList}`}>{letter}</div>;
 }
 
 export default Tile;

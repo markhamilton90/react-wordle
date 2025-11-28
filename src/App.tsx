@@ -13,9 +13,11 @@ function App() {
   const [currentTile, setCurrentTile] = useState<number>(0);
   const [word, setWord] = useState<string>("trees");
   const [win, setWin] = useState<boolean | null>(null);
+  const [animate, setAnimate] = useState<boolean>(false);
 
   const counterRef = useRef<number>(counter);
   const tileRef = useRef<number>(currentTile);
+  const winRef = useRef<boolean | null>(win);
 
   useEffect(() => {
     counterRef.current = counter;
@@ -24,6 +26,10 @@ function App() {
   useEffect(() => {
     tileRef.current = currentTile;
   }, [currentTile]);
+
+  useEffect(() => {
+    winRef.current = win;
+  }, [win]);
 
   useEffect(() => {
     async function getRandomWord() {
@@ -45,9 +51,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    function handleKeyUp(event: KeyboardEvent) {
-      // If counter has exceeded the number of rows, we are done with the game
+    function handleKeyDown(event: KeyboardEvent) {
+      // If win is true, or if counter has exceeded the number of rows,
+      // we are done with the game
+
       if (counterRef.current >= grid.length) {
+        setWin(false);
+      }
+
+      if (winRef.current != null) {
         return;
       }
 
@@ -63,10 +75,10 @@ function App() {
       }
     }
 
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [word]);
 
@@ -75,6 +87,7 @@ function App() {
     updatedGrid[row][tile] = null;
     setGrid([...updatedGrid]);
     setCurrentTile((prev) => (prev > 0 ? prev - 1 : 0));
+    setAnimate(false);
   }
 
   function handleEnter(row: number) {
@@ -88,10 +101,6 @@ function App() {
 
     setCounter((prev) => prev + 1);
     setCurrentTile(0);
-
-    if (counterRef.current >= grid.length) {
-      setWin(false);
-    }
   }
 
   function handleOtherKeys(key: string, row: number, tile: number) {
@@ -109,6 +118,7 @@ function App() {
     updatedGrid[row][tile] = key;
     setGrid([...updatedGrid]);
     setCurrentTile((prev) => prev + 1);
+    setAnimate(true);
   }
 
   return (
@@ -124,6 +134,7 @@ function App() {
               counter={counter}
               currentTile={currentTile}
               rowNumber={index}
+              animate={animate}
             />
           );
         })}
