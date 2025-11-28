@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Row from "./Row";
+import Modal from "./Modal";
 import { makeGrid } from "./helpers";
 
 function App() {
@@ -21,6 +22,10 @@ function App() {
 
   useEffect(() => {
     counterRef.current = counter;
+
+    if (win == null && counter >= grid.length) {
+      setWin(false);
+    }
   }, [counter]);
 
   useEffect(() => {
@@ -52,13 +57,6 @@ function App() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      // If win is true, or if counter has exceeded the number of rows,
-      // we are done with the game
-
-      if (counterRef.current >= grid.length) {
-        setWin(false);
-      }
-
       if (winRef.current != null) {
         return;
       }
@@ -123,7 +121,6 @@ function App() {
 
   return (
     <>
-      {win && <h1>You win!</h1>}
       <div className="grid">
         {grid.map((arr, index) => {
           return (
@@ -139,6 +136,19 @@ function App() {
           );
         })}
       </div>
+      {win != undefined && win && (
+        <Modal>
+          <h1>Well done! You won in just {counter} turn(s)!</h1>
+        </Modal>
+      )}
+      {win != undefined && !win && (
+        <Modal>
+          <h1>
+            You lost! The correct answer was{" "}
+            <span className="highlight">{word}</span>
+          </h1>
+        </Modal>
+      )}
     </>
   );
 }

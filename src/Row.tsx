@@ -9,14 +9,7 @@ interface RowProps {
   animate: boolean;
 }
 
-function Row({
-  letters,
-  word,
-  counter,
-  currentTile,
-  rowNumber,
-  animate,
-}: RowProps) {
+function Row({ letters, ...rest }: RowProps) {
   return (
     <div className="tile-row">
       {[...Array(letters.length)].map((_, index) => {
@@ -25,11 +18,7 @@ function Row({
             letter={letters[index] || ""}
             key={index}
             index={index}
-            word={word}
-            counter={counter}
-            rowNumber={rowNumber}
-            currentTile={currentTile}
-            animate={animate}
+            {...rest}
           />
         );
       })}
