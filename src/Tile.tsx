@@ -23,10 +23,10 @@ function Tile({
   let status = exactMatch ? " match" : outOfPlace ? " out-of-place" : " none";
   status = counter > rowNumber ? status : "";
 
-  const animation =
+  const shouldAnimate =
     counter == rowNumber && index == currentTile - 1 && animate ? " pulse" : "";
 
-  const classList = status + animation;
+  const classList = status + shouldAnimate;
 
   return <div className={`tile ${classList}`}>{letter}</div>;
 }
