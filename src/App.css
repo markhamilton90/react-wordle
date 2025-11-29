@@ -55,15 +55,22 @@
   }
 }
 
-dialog {
-  max-width: 700px;
-  padding: 2em;
-  border: none;
-  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.4);
-  outline: none;
-}
-
-dialog::backdrop {
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(0.5px);
+}
+
+.modal {
+  max-width: 700px;
+  padding: 2em;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.4);
+  background-color: white;
 }
