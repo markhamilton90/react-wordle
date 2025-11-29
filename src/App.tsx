@@ -23,7 +23,7 @@ function App() {
   useEffect(() => {
     counterRef.current = counter;
 
-    if (win == null && counter >= grid.length) {
+    if (counter >= grid.length && win === null) {
       setWin(false);
     }
   }, [counter]);
@@ -37,26 +37,12 @@ function App() {
   }, [win]);
 
   useEffect(() => {
-    async function getRandomWord() {
-      try {
-        const response = await fetch(
-          "https://random-word-api.vercel.app/api?words=1&length=5"
-        );
-        if (!response.ok) {
-          throw new Error(`Response status: ${response.status}`);
-        }
-        const json = await response.json();
-        setWord(json[0]);
-      } catch (error: any) {
-        console.error(error.message);
-      }
-    }
-
     getRandomWord();
   }, []);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      // If win has a value that means the game is over
       if (winRef.current != null) {
         return;
       }
@@ -93,12 +79,13 @@ function App() {
       return;
     }
 
-    if (grid[row].join("") === word) {
-      setWin(true);
-    }
-
     setCounter((prev) => prev + 1);
     setCurrentTile(0);
+
+    if (grid[row].join("") === word) {
+      setWin(true);
+      return;
+    }
   }
 
   function handleOtherKeys(key: string, row: number, tile: number) {
@@ -119,6 +106,51 @@ function App() {
     setAnimate(true);
   }
 
+  async function getRandomWord() {
+    try {
+      const response = await fetch(
+        "https://random-word-api.vercel.app/api?words=1&length=5"
+      );
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      setWord(json[0]);
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  }
+
+  function resetGame() {
+    setGrid(gridArray);
+    setCounter(0);
+    setCurrentTile(0);
+    setWord("");
+    setWin(null);
+    setAnimate(false);
+
+    getRandomWord();
+  }
+
+  const winModal = (
+    <Modal>
+      <h2>Well done! You won in just {counter} turn(s)!</h2>
+      <button onClick={resetGame}>Play Again?</button>
+    </Modal>
+  );
+
+  const loseModal = (
+    <Modal>
+      <h2>
+        You lost! The correct answer was{" "}
+        <span className="highlight">{word}</span>
+      </h2>
+      <button onClick={resetGame}>Try Again?</button>
+    </Modal>
+  );
+
+  const showModal = win === true ? winModal : win === false ? loseModal : "";
+
   return (
     <>
       <div className="grid">
@@ -136,19 +168,7 @@ function App() {
           );
         })}
       </div>
-      {win != undefined && win && (
-        <Modal>
-          <h1>Well done! You won in just {counter} turn(s)!</h1>
-        </Modal>
-      )}
-      {win != undefined && !win && (
-        <Modal>
-          <h1>
-            You lost! The correct answer was{" "}
-            <span className="highlight">{word}</span>
-          </h1>
-        </Modal>
-      )}
+      {showModal}
     </>
   );
 }
