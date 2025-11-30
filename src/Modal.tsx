@@ -5,7 +5,7 @@ interface ModalProps {
 function Modal({ children }: ModalProps) {
   return (
     <div className="modal-overlay">
-      <div className="modal">{children}</div>
+      <div className="modal pulse">{children}</div>
     </div>
   );
 }

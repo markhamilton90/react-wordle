@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Row from "./Row";
 import Modal from "./Modal";
+import Keyboard from "./Keyboard";
 import { makeGrid } from "./helpers";
 
 function App() {
@@ -40,72 +41,6 @@ function App() {
     getRandomWord();
   }, []);
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      // If win has a value that means the game is over
-      if (winRef.current != null) {
-        return;
-      }
-
-      switch (event.key) {
-        case "Backspace":
-          handleDelete(counterRef.current, tileRef.current - 1);
-          break;
-        case "Enter":
-          handleEnter(counterRef.current);
-          break;
-        default:
-          handleOtherKeys(event.key, counterRef.current, tileRef.current);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [word]);
-
-  function handleDelete(row: number, tile: number) {
-    const updatedGrid = [...grid];
-    updatedGrid[row][tile] = null;
-    setGrid([...updatedGrid]);
-    setCurrentTile((prev) => (prev > 0 ? prev - 1 : 0));
-    setAnimate(false);
-  }
-
-  function handleEnter(row: number) {
-    if (grid[row].includes(null)) {
-      return;
-    }
-
-    setCounter((prev) => prev + 1);
-    setCurrentTile(0);
-
-    if (grid[row].join("") === word) {
-      setWin(true);
-      return;
-    }
-  }
-
-  function handleOtherKeys(key: string, row: number, tile: number) {
-    if (tile === grid[row].length) {
-      return;
-    }
-
-    key = key.toLowerCase();
-
-    if (/^[a-z]$/.test(key) == false) {
-      return;
-    }
-
-    const updatedGrid = [...grid];
-    updatedGrid[row][tile] = key;
-    setGrid([...updatedGrid]);
-    setCurrentTile((prev) => prev + 1);
-    setAnimate(true);
-  }
-
   async function getRandomWord() {
     try {
       const response = await fetch(
@@ -121,11 +56,76 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      // If win has a value that means the game is over
+      if (winRef.current != null) {
+        return;
+      }
+
+      switch (event.key) {
+        case "Backspace":
+          handleDelete();
+          break;
+        case "Enter":
+          handleEnter();
+          break;
+        default:
+          handleOtherKeys(event.key);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [word]);
+
+  function handleDelete() {
+    const updatedGrid = [...grid];
+    updatedGrid[counterRef.current][tileRef.current - 1] = null;
+    setGrid([...updatedGrid]);
+    setCurrentTile((prev) => (prev > 0 ? prev - 1 : 0));
+    setAnimate(false);
+  }
+
+  function handleEnter() {
+    if (grid[counterRef.current].includes(null)) {
+      return;
+    }
+
+    setCounter((prev) => prev + 1);
+    setCurrentTile(0);
+
+    if (grid[counterRef.current].join("") === word) {
+      setWin(true);
+      return;
+    }
+  }
+
+  function handleOtherKeys(key: string) {
+    if (tileRef.current === grid[counterRef.current].length) {
+      return;
+    }
+
+    key = key.toLowerCase();
+
+    if (/^[a-z]$/.test(key) == false) {
+      return;
+    }
+
+    const updatedGrid = [...grid];
+    updatedGrid[counterRef.current][tileRef.current] = key;
+    setGrid([...updatedGrid]);
+    setCurrentTile((prev) => prev + 1);
+    setAnimate(true);
+  }
+
   function resetGame() {
     setGrid(gridArray);
     setCounter(0);
     setCurrentTile(0);
-    setWord("");
     setWin(null);
     setAnimate(false);
 
@@ -153,7 +153,8 @@ function App() {
 
   return (
     <>
-      <div className="grid">
+      {word}
+      <div className="tile-grid">
         {grid.map((arr, index) => {
           return (
             <Row
@@ -168,6 +169,11 @@ function App() {
           );
         })}
       </div>
+      <Keyboard
+        handleKeys={handleOtherKeys}
+        handleEnter={handleEnter}
+        handleDelete={handleDelete}
+      />
       {showModal}
     </>
   );
