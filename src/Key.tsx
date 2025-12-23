@@ -1,6 +1,6 @@
 interface KeyProps {
   keyHandler: Function;
-  children: React.ReactNode;
+  children: string;
 }
 
 function Key({ keyHandler, children }: KeyProps) {

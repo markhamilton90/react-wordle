@@ -16,26 +16,7 @@ function App() {
   const [word, setWord] = useState<string>("trees");
   const [win, setWin] = useState<boolean | null>(null);
   const [animate, setAnimate] = useState<boolean>(false);
-
-  const counterRef = useRef<number>(counter);
-  const tileRef = useRef<number>(currentTile);
-  const winRef = useRef<boolean | null>(win);
-
-  useEffect(() => {
-    counterRef.current = counter;
-
-    if (counter >= grid.length && win === null) {
-      setWin(false);
-    }
-  }, [counter]);
-
-  useEffect(() => {
-    tileRef.current = currentTile;
-  }, [currentTile]);
-
-  useEffect(() => {
-    winRef.current = win;
-  }, [win]);
+  const [guesses, setGuesses] = useState<string[]>([]);
 
   useEffect(() => {
     getRandomWord();
@@ -59,7 +40,7 @@ function App() {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       // If win has a value that means the game is over
-      if (winRef.current != null) {
+      if (win != null) {
         return;
       }
 
@@ -80,32 +61,38 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [word]);
+  }, [word, counter, win, currentTile]);
 
   function handleDelete() {
     const updatedGrid = [...grid];
-    updatedGrid[counterRef.current][tileRef.current - 1] = null;
+    updatedGrid[counter][currentTile - 1] = null;
     setGrid([...updatedGrid]);
     setCurrentTile((prev) => (prev > 0 ? prev - 1 : 0));
     setAnimate(false);
   }
 
   function handleEnter() {
-    if (grid[counterRef.current].includes(null)) {
+    if (grid[counter].includes(null)) {
       return;
     }
 
     setCounter((prev) => prev + 1);
+    if (counter >= grid.length && win === null) {
+      setWin(false);
+    }
     setCurrentTile(0);
 
-    if (grid[counterRef.current].join("") === word) {
+    let guess = grid[counter].join("");
+    setGuesses((guesses) => [...guesses, guess]);
+
+    if (grid[counter].join("") === word) {
       setWin(true);
       return;
     }
   }
 
   function handleOtherKeys(key: string) {
-    if (tileRef.current === grid[counterRef.current].length) {
+    if (currentTile === grid[counter].length) {
       return;
     }
 
@@ -116,7 +103,7 @@ function App() {
     }
 
     const updatedGrid = [...grid];
-    updatedGrid[counterRef.current][tileRef.current] = key;
+    updatedGrid[counter][currentTile] = key;
     setGrid([...updatedGrid]);
     setCurrentTile((prev) => prev + 1);
     setAnimate(true);

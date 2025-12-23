@@ -13,12 +13,19 @@ function Keyboard({ handleKeys, handleEnter, handleDelete }: KeyboardProps) {
     ["enter", "z", "x", "c", "v", "b", "n", "m", "back"],
   ];
 
+  //   let exactMatches = [],
+  //     outOfPlace = [],
+  //     notFound = [];
+
   function getKeyHandler(key: string): Function {
-    return key === "enter"
-      ? handleEnter
-      : key === "back"
-      ? handleDelete
-      : handleKeys;
+    switch (key) {
+      case "enter":
+        return handleEnter;
+      case "back":
+        return handleDelete;
+      default:
+        return handleKeys;
+    }
   }
 
   return (
