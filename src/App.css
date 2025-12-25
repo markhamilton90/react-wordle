@@ -24,18 +24,6 @@
   align-items: center;
 }
 
-.match {
-  background: springgreen;
-}
-
-.out-of-place {
-  background: #f9d31d;
-}
-
-.none {
-  background: darkgray;
-}
-
 .pulse {
   animation: 0.15s pulse;
 }
@@ -94,18 +82,22 @@
   font-family: monospace;
   font-weight: bold;
   text-transform: uppercase;
-  color: white;
-  background: gray;
-  border: 1px solid #333;
+  background: lightgray;
   border-radius: 3px;
   margin: 5px;
   cursor: pointer;
   transition: 0.1s;
 }
-.mini-key:hover {
-  background: #464646;
+
+.match {
+  background: springgreen;
 }
 
-.usedKey {
-  background-color: hotpink !important;
+.out-of-place {
+  background: #f9d31d;
+}
+
+.not-found,
+.none {
+  background: darkgray;
 }

@@ -1,21 +1,24 @@
 import Key from "./Key";
+import type { GuessesState } from "./App";
 
 interface KeyboardProps {
   handleKeys: Function;
   handleEnter: Function;
   handleDelete: Function;
+  guesses: GuessesState;
 }
 
-function Keyboard({ handleKeys, handleEnter, handleDelete }: KeyboardProps) {
+function Keyboard({
+  handleKeys,
+  handleEnter,
+  handleDelete,
+  guesses,
+}: KeyboardProps) {
   const KEYBOARD = [
     ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
     ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
     ["enter", "z", "x", "c", "v", "b", "n", "m", "back"],
   ];
-
-  //   let exactMatches = [],
-  //     outOfPlace = [],
-  //     notFound = [];
 
   function getKeyHandler(key: string): Function {
     switch (key) {
@@ -28,6 +31,18 @@ function Keyboard({ handleKeys, handleEnter, handleDelete }: KeyboardProps) {
     }
   }
 
+  function getKeyStatus(key: string): string {
+    if (guesses.matches.includes(key)) {
+      return "match";
+    } else if (guesses.outOfPlace.includes(key)) {
+      return "out-of-place";
+    } else if (guesses.notFound.includes(key)) {
+      return "not-found";
+    } else {
+      return "";
+    }
+  }
+
   return (
     <div className="mini-keyboard">
       {KEYBOARD.map((row, index) => {
@@ -35,8 +50,13 @@ function Keyboard({ handleKeys, handleEnter, handleDelete }: KeyboardProps) {
           <div className="mini-row" key={index}>
             {row.map((key) => {
               const keyHandler = getKeyHandler(key);
+              const keyStatus = getKeyStatus(key);
               return (
-                <Key key={key} keyHandler={() => keyHandler(key)}>
+                <Key
+                  key={key}
+                  keyHandler={() => keyHandler(key)}
+                  keyStatus={keyStatus}
+                >
                   {key}
                 </Key>
               );

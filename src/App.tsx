@@ -1,9 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Row from "./Row";
 import Modal from "./Modal";
 import Keyboard from "./Keyboard";
 import { makeGrid } from "./helpers";
+
+export interface GuessesState {
+  matches: string[];
+  outOfPlace: string[];
+  notFound: string[];
+}
 
 function App() {
   const ROWS = 6;
@@ -16,7 +22,11 @@ function App() {
   const [word, setWord] = useState<string>("trees");
   const [win, setWin] = useState<boolean | null>(null);
   const [animate, setAnimate] = useState<boolean>(false);
-  const [guesses, setGuesses] = useState<string[]>([]);
+  const [guesses, setGuesses] = useState<GuessesState>({
+    matches: [],
+    outOfPlace: [],
+    notFound: [],
+  });
 
   useEffect(() => {
     getRandomWord();
@@ -77,17 +87,13 @@ function App() {
     }
 
     setCounter((prev) => prev + 1);
-    if (counter >= grid.length && win === null) {
-      setWin(false);
-    }
     setCurrentTile(0);
-
-    let guess = grid[counter].join("");
-    setGuesses((guesses) => [...guesses, guess]);
+    recordGuesses(grid[counter]);
 
     if (grid[counter].join("") === word) {
       setWin(true);
-      return;
+    } else if (counter >= grid.length - 1 && win === null) {
+      setWin(false);
     }
   }
 
@@ -109,12 +115,41 @@ function App() {
     setAnimate(true);
   }
 
+  function recordGuesses(letters: (string | null)[]) {
+    const matches: string[] = [];
+    const outOfPlace: string[] = [];
+    const notFound: string[] = [];
+
+    letters.forEach((letter, index) => {
+      if (letter === null) return;
+
+      if (word[index] === letter) {
+        matches.push(letter);
+      } else if (word.includes(letter)) {
+        outOfPlace.push(letter);
+      } else {
+        notFound.push(letter);
+      }
+    });
+
+    setGuesses((prev) => ({
+      matches: [...new Set([...prev.matches, ...matches])],
+      outOfPlace: [...new Set([...prev.outOfPlace, ...outOfPlace])],
+      notFound: [...new Set([...prev.notFound, ...notFound])],
+    }));
+  }
+
   function resetGame() {
     setGrid(gridArray);
     setCounter(0);
     setCurrentTile(0);
     setWin(null);
     setAnimate(false);
+    setGuesses({
+      matches: [],
+      outOfPlace: [],
+      notFound: [],
+    });
 
     getRandomWord();
   }
@@ -132,7 +167,7 @@ function App() {
         You lost! The correct answer was{" "}
         <span className="highlight">{word}</span>
       </h2>
-      <button onClick={resetGame}>Try Again?</button>
+      <button onClick={resetGame}>Play Again?</button>
     </Modal>
   );
 
@@ -140,7 +175,6 @@ function App() {
 
   return (
     <>
-      {word}
       <div className="tile-grid">
         {grid.map((arr, index) => {
           return (
@@ -160,6 +194,7 @@ function App() {
         handleKeys={handleOtherKeys}
         handleEnter={handleEnter}
         handleDelete={handleDelete}
+        guesses={guesses}
       />
       {showModal}
     </>
