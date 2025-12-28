@@ -27,6 +27,7 @@ function App() {
     outOfPlace: [],
     notFound: [],
   });
+  const [showRules, setShowRules] = useState<boolean>(true);
 
   useEffect(() => {
     getRandomWord();
@@ -154,6 +155,28 @@ function App() {
     getRandomWord();
   }
 
+  const rulesModal = (
+    <Modal>
+      <div className="game-rules">
+        <h2>How to Play</h2>
+        <p>Guess the 5-letter word in 6 tries</p>
+        <p>
+          Use the keyboard (real or virtual) and hit Enter to submit a guess
+        </p>
+        <p>
+          After making a guess, the color of each tile will change:
+          <br />
+          Green means the letter is in the right spot.
+          <br />
+          Yellow means the letter is in the word but in the wrong spot.
+          <br />
+          Gray means that letter is not in the word at all.
+        </p>
+      </div>
+      <button onClick={() => setShowRules(false)}>Play Game</button>
+    </Modal>
+  );
+
   const winModal = (
     <Modal>
       <h2>Well done! You won in just {counter} turn(s)!</h2>
@@ -175,6 +198,10 @@ function App() {
 
   return (
     <>
+      {showRules && rulesModal}
+      <div className="rulesButton" onClick={() => setShowRules(true)}>
+        ?
+      </div>
       <div className="tile-grid">
         {grid.map((arr, index) => {
           return (
